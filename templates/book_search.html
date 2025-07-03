@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Search Books - Little Flower Library{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h2 text-primary">
+        <i class="fas fa-search me-3"></i>Search Books
+    </h1>
+    <p class="text-muted">Discover and borrow books from our collection</p>
+</div>
+
+<!-- Enhanced Search Form -->
+<div class="card card-enhanced shadow-lg mb-4">
+    <div class="card-body p-4">
+        <form method="GET" class="row g-4">
+            <div class="col-md-6">
+                <label for="search" class="form-label fw-bold">
+                    <i class="fas fa-search me-2 text-primary"></i>Search by Title or Author
+                </label>
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="form-control form-control-lg" id="search" name="q" 
+                           value="{{ query }}" placeholder="Enter book title or author name...">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label for="genre" class="form-label fw-bold">
+                    <i class="fas fa-filter me-2 text-secondary"></i>Filter by Genre
+                </label>
+                <select class="form-select form-select-lg" id="genre" name="genre">
+                    <option value="">All Genres</option>
+                    {% for genre in genres %}
+                    <option value="{{ genre }}" {{ 'selected' if genre == selected_genre else '' }}>
+                        {{ genre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-enhanced btn-primary btn-lg w-100">
+                    <i class="fas fa-search me-2"></i>Search
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Search Results -->
+<div class="card shadow-sm">
+    <div class="card-header bg-light">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-list me-2"></i>
+            {% if query or selected_genre %}
+                Search Results ({{ books|length }} books found)
+            {% else %}
+                All Books ({{ books|length }} books)
+            {% endif %}
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if books %}
+        <div class="row" id="book-results">
+            {% for book in books %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 book-card card-enhanced shadow-lg fade-in-up" style="animation-delay: {{ loop.index0 * 0.1 }}s;">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-title text-primary fw-bold mb-0">{{ book.title }}</h5>
+                            <span class="badge bg-{{ 'success' if book.available_copies > 0 else 'danger' }} rounded-pill">
+                                {{ book.available_copies }}/{{ book.total_copies }}
+                            </span>
+                        </div>
+                        <h6 class="card-subtitle mb-3 text-muted">
+                            <i class="fas fa-user me-1"></i>by {{ book.author }}
+                        </h6>
+                        <div class="mb-3">
+                            <span class="badge bg-secondary me-2">
+                                <i class="fas fa-tag me-1"></i>{{ book.genre }}
+                            </span>
+                            <span class="badge bg-info">
+                                <i class="fas fa-calendar me-1"></i>{{ book.publication_year }}
+                            </span>
+                        </div>
+                        <div class="book-details bg-light rounded p-3 mb-3">
+                            <small class="text-muted d-block">
+                                <strong>ISBN:</strong> {{ book.isbn }}
+                            </small>
+                            <div class="mt-2">
+                                <div class="progress" style="height: 8px;">
+                                    {% set availability_percent = (book.available_copies / book.total_copies * 100) if book.total_copies > 0 else 0 %}
+                                    <div class="progress-bar bg-{{ 'success' if availability_percent > 50 else 'warning' if availability_percent > 0 else 'danger' }}" 
+                                         style="width: {{ availability_percent }}%"></div>
+                                </div>
+                                <small class="text-muted mt-1 d-block">
+                                    Availability: {{ book.available_copies }} of {{ book.total_copies }} copies
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 p-4 pt-0">
+                        {% if current_user.role in ['student', 'teacher'] %}
+                            {% set user_has_book = false %}
+                            {% set user_has_request = false %}
+                            
+                            {% if book.available_copies > 0 and not user_has_book and not user_has_request %}
+                                <div class="btn-group w-100" role="group">
+                                    <a href="{{ url_for('request_book', book_id=book.id) }}" 
+                                       class="btn btn-enhanced btn-primary">
+                                        <i class="fas fa-paper-plane me-2"></i>Request Book
+                                    </a>
+                                    <a href="{{ url_for('request_book_quick', book_id=book.id) }}" 
+                                       class="btn btn-enhanced btn-outline-primary"
+                                       onclick="return confirm('Submit a quick request for this book? Admin will review and approve.')">
+                                        <i class="fas fa-bolt"></i>
+                                    </a>
+                                </div>
+                            {% elif user_has_book %}
+                                <button class="btn btn-outline-info w-100" disabled>
+                                    <i class="fas fa-check me-2"></i>Already Borrowed
+                                </button>
+                            {% elif user_has_request %}
+                                <button class="btn btn-outline-warning w-100" disabled>
+                                    <i class="fas fa-clock me-2"></i>Request Pending
+                                </button>
+                            {% elif book.available_copies <= 0 %}
+                                <button class="btn btn-outline-danger w-100" disabled>
+                                    <i class="fas fa-users me-2"></i>All Copies Borrowed
+                                </button>
+                            {% else %}
+                                <button class="btn btn-outline-secondary w-100" disabled>
+                                    <i class="fas fa-exclamation me-2"></i>Cannot Request
+                                </button>
+                            {% endif %}
+                        {% else %}
+                            {% if book.available_copies > 0 %}
+                                <button class="btn btn-outline-success w-100" disabled>
+                                    <i class="fas fa-check me-2"></i>Available for Request
+                                </button>
+                            {% else %}
+                                <button class="btn btn-outline-danger w-100" disabled>
+                                    <i class="fas fa-users me-2"></i>All Copies Borrowed
+                                </button>
+                            {% endif %}
+                        {% endif %}
+                        
+                        <!-- Show who has borrowed if admin -->
+                        {% if current_user.role == 'admin' and book.available_copies < book.total_copies %}
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    {{ book.total_copies - book.available_copies }} 
+                                    {{ 'copy' if (book.total_copies - book.available_copies) == 1 else 'copies' }} borrowed
+                                </small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-search fa-4x text-muted mb-4"></i>
+            <h4 class="text-muted">No Books Found</h4>
+            {% if query or selected_genre %}
+                <p class="text-muted">Try adjusting your search criteria or browse all books.</p>
+                <a href="{{ url_for('book_search') }}" class="btn btn-primary">
+                    <i class="fas fa-list me-2"></i>Show All Books
+                </a>
+            {% else %}
+                <p class="text-muted">No books are currently available in the library.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit form on genre change
+    document.getElementById('genre').addEventListener('change', function() {
+        this.form.submit();
+    });
+});
+</script>
+{% endblock %}

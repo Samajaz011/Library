@@ -1,0 +1,371 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Reports - Little Flower Library{% endblock %}
+
+{% block content %}
+<div class="page-header mb-4">
+    <h1 class="page-title">
+        <i class="fas fa-chart-bar me-3"></i>Library Reports & Analytics
+    </h1>
+    <p class="text-muted">Comprehensive library statistics, overdue tracking, and performance analytics</p>
+</div>
+
+<!-- Key Statistics -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-4">
+        <div class="card card-enhanced bg-primary text-white shadow-lg scale-in">
+            <div class="card-body text-center p-4">
+                <i class="fas fa-books fa-3x mb-3"></i>
+                <h2 class="fw-bold">{{ data.total_books }}</h2>
+                <p class="mb-0">Total Books</p>
+                <small class="opacity-75">{{ data.total_copies }} total copies</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card card-enhanced bg-success text-white shadow-lg scale-in" style="animation-delay: 0.1s;">
+            <div class="card-body text-center p-4">
+                <i class="fas fa-check-circle fa-3x mb-3"></i>
+                <h2 class="fw-bold">{{ data.available_copies }}</h2>
+                <p class="mb-0">Available</p>
+                <small class="opacity-75">{{ data.borrowed_copies }} currently borrowed</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card card-enhanced bg-warning text-white shadow-lg scale-in" style="animation-delay: 0.2s;">
+            <div class="card-body text-center p-4">
+                <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                <h2 class="fw-bold">{{ data.overdue_count }}</h2>
+                <p class="mb-0">Overdue Books</p>
+                <small class="opacity-75">{{ "%.2f"|format(data.total_fines_due) }} rs pending</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card card-enhanced bg-info text-white shadow-lg scale-in" style="animation-delay: 0.3s;">
+            <div class="card-body text-center p-4">
+                <i class="fas fa-users fa-3x mb-3"></i>
+                <h2 class="fw-bold">{{ data.active_borrowers }}</h2>
+                <p class="mb-0">Active Users</p>
+                <small class="opacity-75">{{ data.total_users }} total users</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Financial Overview -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-4">
+        <div class="card card-enhanced bg-success text-white shadow-lg scale-in">
+            <div class="card-body text-center p-4">
+                <i class="fas fa-coins fa-3x mb-3"></i>
+                <h2 class="fw-bold">{{ "%.2f"|format(data.total_revenue) }} rs</h2>
+                <p class="mb-0">Total Revenue</p>
+                <small class="opacity-75">From fine collections</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card card-enhanced bg-danger text-white shadow-lg scale-in" style="animation-delay: 0.1s;">
+            <div class="card-body text-center p-4">
+                <i class="fas fa-clock fa-3x mb-3"></i>
+                <h2 class="fw-bold">{{ "%.2f"|format(data.total_fines_due) }} rs</h2>
+                <p class="mb-0">Pending Fines</p>
+                <small class="opacity-75">To be collected</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card card-enhanced bg-primary text-white shadow-lg scale-in" style="animation-delay: 0.2s;">
+            <div class="card-body text-center p-4">
+                <i class="fas fa-check-circle fa-3x mb-3"></i>
+                <h2 class="fw-bold">{{ "%.2f"|format(data.todays_collections) }} rs</h2>
+                <p class="mb-0">Collected Today</p>
+                <small class="opacity-75">From overdue returns</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Overdue Books Alert -->
+{% if data.overdue_transactions %}
+<div class="alert alert-warning shadow-lg mb-4" role="alert">
+    <div class="d-flex align-items-center">
+        <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+        <div>
+            <h5 class="alert-heading mb-1">Overdue Books Alert!</h5>
+            <p class="mb-0">{{ data.overdue_count }} books are overdue with total fines of {{ "%.2f"|format(data.total_fines_due) }} rs</p>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row">
+    <!-- Overdue Books -->
+    <div class="col-lg-8 mb-4">
+        <div class="card card-enhanced shadow-lg">
+            <div class="card-header bg-danger text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-clock me-2"></i>Overdue Books ({{ data.overdue_count }})
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if data.overdue_transactions %}
+                <div class="table-responsive">
+                    <table class="table table-modern table-hover">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-user me-1"></i>Borrower</th>
+                                <th><i class="fas fa-book me-1"></i>Book</th>
+                                <th><i class="fas fa-calendar me-1"></i>Due Date</th>
+                                <th><i class="fas fa-clock me-1"></i>Days Overdue</th>
+                                <th><i class="fas fa-coins me-1"></i>Fine Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in data.overdue_transactions %}
+                            <tr class="fade-in-up" style="animation-delay: {{ loop.index0 * 0.05 }}s;">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-{{ 'secondary' if item.user.role == 'teacher' else 'warning' }} text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; font-size: 14px;">
+                                            {{ item.user.full_name[0] if item.user else '?' }}
+                                        </div>
+                                        <div>
+                                            <strong>{{ item.user.full_name if item.user else 'Unknown' }}</strong>
+                                            <br><small class="text-muted">{{ item.user.role.title() if item.user else '' }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong class="text-primary">{{ item.book.title if item.book else 'Unknown Book' }}</strong>
+                                    <br><small class="text-muted">{{ item.book.author if item.book else '' }}</small>
+                                </td>
+                                <td>
+                                    <span class="text-danger fw-bold">{{ item.transaction.due_date.strftime('%Y-%m-%d') }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-danger rounded-pill px-3">
+                                        {{ item.transaction.days_overdue }} days
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="fw-bold text-danger">{{ "%.2f"|format(item.transaction.fine_amount) }} rs</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                    <h5 class="text-success">No Overdue Books!</h5>
+                    <p class="text-muted">All books are returned on time.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Library Performance -->
+    <div class="col-lg-4 mb-4">
+        <div class="card card-glass shadow-lg mb-4">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-pie me-2 text-primary"></i>Library Usage
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Books Borrowed</span>
+                        <strong>{{ data.borrowed_copies }}</strong>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        {% set usage_percent = (data.borrowed_copies / data.total_copies * 100) if data.total_copies > 0 else 0 %}
+                        <div class="progress-bar bg-primary" style="width: {{ usage_percent }}%"></div>
+                    </div>
+                    <small class="text-muted">{{ "%.1f"|format(usage_percent) }}% utilization</small>
+                </div>
+                
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Active Borrowers</span>
+                        <strong>{{ data.active_borrowers }}</strong>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        {% set active_percent = (data.active_borrowers / data.total_users * 100) if data.total_users > 0 else 0 %}
+                        <div class="progress-bar bg-success" style="width: {{ active_percent }}%"></div>
+                    </div>
+                    <small class="text-muted">{{ "%.1f"|format(active_percent) }}% of users</small>
+                </div>
+
+                <div class="mb-0">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Recent Activity</span>
+                        <strong>{{ data.recent_activity_count }}</strong>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        {% set activity_percent = (data.recent_activity_count / data.total_transactions * 100) if data.total_transactions > 0 else 0 %}
+                        <div class="progress-bar bg-info" style="width: {{ activity_percent }}%"></div>
+                    </div>
+                    <small class="text-muted">Last 30 days</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Popular Books and Active Users -->
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card card-enhanced shadow-lg">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-star me-2"></i>Most Popular Books
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if data.popular_books %}
+                <div class="table-responsive">
+                    <table class="table table-modern">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-trophy me-1"></i>Rank</th>
+                                <th><i class="fas fa-book me-1"></i>Book</th>
+                                <th><i class="fas fa-download me-1"></i>Borrows</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in data.popular_books %}
+                            <tr class="fade-in-up" style="animation-delay: {{ loop.index0 * 0.1 }}s;">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge bg-{{ 'warning' if loop.index == 1 else 'secondary' if loop.index == 2 else 'light text-dark' }} rounded-pill me-2">
+                                            #{{ loop.index }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong class="text-primary">{{ item.book.title }}</strong>
+                                    <br><small class="text-muted">{{ item.book.author }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success rounded-pill px-3">
+                                        {{ item.borrow_count }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-book fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No borrowing data available yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card card-enhanced shadow-lg">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-users me-2"></i>Most Active Users
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if data.active_users %}
+                <div class="table-responsive">
+                    <table class="table table-modern">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-medal me-1"></i>Rank</th>
+                                <th><i class="fas fa-user me-1"></i>User</th>
+                                <th><i class="fas fa-book me-1"></i>Borrows</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in data.active_users %}
+                            <tr class="fade-in-up" style="animation-delay: {{ loop.index0 * 0.1 }}s;">
+                                <td>
+                                    <span class="badge bg-{{ 'warning' if loop.index == 1 else 'secondary' if loop.index == 2 else 'light text-dark' }} rounded-pill">
+                                        #{{ loop.index }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-{{ 'secondary' if item.user.role == 'teacher' else 'warning' }} text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; font-size: 14px;">
+                                            {{ item.user.full_name[0] }}
+                                        </div>
+                                        <div>
+                                            <strong>{{ item.user.full_name }}</strong>
+                                            <br><small class="text-muted">{{ item.user.role.title() }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info rounded-pill px-3">
+                                        {{ item.borrow_count }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No user activity data available yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row">
+    <div class="col-12">
+        <div class="card card-glass shadow-lg">
+            <div class="card-body p-4">
+                <h5 class="card-title mb-3">
+                    <i class="fas fa-tools me-2 text-primary"></i>Quick Actions
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <a href="{{ url_for('assign_book') }}" class="btn btn-enhanced btn-primary w-100">
+                            <i class="fas fa-hand-holding-heart me-2"></i>Assign Books
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{{ url_for('borrow_return') }}" class="btn btn-enhanced btn-info w-100">
+                            <i class="fas fa-exchange-alt me-2"></i>View Transactions
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{{ url_for('export_financial_report') }}" class="btn btn-enhanced btn-success w-100">
+                            <i class="fas fa-download me-2"></i>Financial Report
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{{ url_for('fine_collections_report') }}" class="btn btn-enhanced btn-danger w-100">
+                            <i class="fas fa-file-pdf me-2"></i>PDF Collections
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-enhanced btn-outline-primary w-100">
+                            <i class="fas fa-dashboard me-2"></i>Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

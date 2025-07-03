@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Activity Monitoring - Little Flower Library{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h2 text-primary">
+        <i class="fas fa-chart-line me-3"></i>Activity Monitoring
+    </h1>
+    <p class="text-muted">Real-time user activity tracking with IP addresses and timestamps</p>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-light">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-history me-2"></i>Recent Activity Logs
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if logs %}
+        <div class="table-responsive">
+            <table class="table table-modern table-hover">
+                <thead>
+                    <tr>
+                        <th data-sort>
+                            <i class="fas fa-clock me-1"></i>Timestamp
+                        </th>
+                        <th>
+                            <i class="fas fa-user me-1"></i>User
+                        </th>
+                        <th>
+                            <i class="fas fa-activity me-1"></i>Action
+                        </th>
+                        <th>
+                            <i class="fas fa-map-marker-alt me-1"></i>IP Address
+                        </th>
+                        <th>
+                            <i class="fas fa-info me-1"></i>Details
+                        </th>
+                    </tr>
+                </thead>
+                <tbody data-skeleton="true">
+                    {% for item in logs %}
+                    <tr class="fade-in-up" style="animation-delay: {{ loop.index0 * 0.03 }}s;">
+                        <td>
+                            <div class="activity-status" data-timestamp="{{ item.log.timestamp.isoformat() }}">
+                                <strong>{{ item.log.timestamp.strftime('%Y-%m-%d') }}</strong>
+                                <br><small class="text-muted">{{ item.log.timestamp.strftime('%H:%M:%S') }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            {% if item.user %}
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-{{ 'primary' if item.user.role == 'admin' else 'secondary' if item.user.role == 'teacher' else 'warning' }} text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; font-size: 14px;">
+                                        {{ item.user.full_name[0] }}
+                                    </div>
+                                    <div>
+                                        <strong>{{ item.user.full_name }}</strong>
+                                        <br><small class="text-muted">{{ item.user.username }} ({{ item.user.role }})</small>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <span class="text-muted fst-italic">Unknown User</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.log.action == 'admin_login' %}
+                                <span class="badge bg-primary rounded-pill px-3">
+                                    <i class="fas fa-sign-in-alt me-1"></i>Admin Login
+                                </span>
+                            {% elif item.log.action == 'teacher_login' %}
+                                <span class="badge bg-secondary rounded-pill px-3">
+                                    <i class="fas fa-sign-in-alt me-1"></i>Teacher Login
+                                </span>
+                            {% elif item.log.action == 'student_login' %}
+                                <span class="badge bg-warning rounded-pill px-3">
+                                    <i class="fas fa-sign-in-alt me-1"></i>Student Login
+                                </span>
+                            {% elif item.log.action == 'logout' %}
+                                <span class="badge bg-light text-dark rounded-pill px-3">
+                                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                                </span>
+                            {% elif item.log.action == 'borrow_book' %}
+                                <span class="badge bg-info rounded-pill px-3">
+                                    <i class="fas fa-book me-1"></i>Borrow Book
+                                </span>
+                            {% elif item.log.action == 'return_book' %}
+                                <span class="badge bg-success rounded-pill px-3">
+                                    <i class="fas fa-undo me-1"></i>Return Book
+                                </span>
+                            {% elif item.log.action == 'add_book' %}
+                                <span class="badge bg-primary rounded-pill px-3">
+                                    <i class="fas fa-plus me-1"></i>Add Book
+                                </span>
+                            {% elif item.log.action == 'delete_book' %}
+                                <span class="badge bg-danger rounded-pill px-3">
+                                    <i class="fas fa-trash me-1"></i>Delete Book
+                                </span>
+                            {% elif item.log.action == 'add_user' %}
+                                <span class="badge bg-success rounded-pill px-3">
+                                    <i class="fas fa-user-plus me-1"></i>Add User
+                                </span>
+                            {% else %}
+                                <span class="badge bg-light text-dark rounded-pill px-3">{{ item.log.action }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <code class="bg-light text-primary px-2 py-1 rounded">{{ item.log.ip_address }}</code>
+                        </td>
+                        <td>
+                            {% if item.log.details %}
+                                <div class="bg-light rounded p-2">
+                                    {% for key, value in item.log.details.items() %}
+                                        <small class="text-muted d-block">
+                                            <strong>{{ key }}:</strong> {{ value }}
+                                        </small>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <span class="text-muted fst-italic">No details</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-chart-line fa-4x text-muted mb-4"></i>
+            <h4 class="text-muted">No Activity Logs</h4>
+            <p class="text-muted">User activity will appear here as they interact with the system.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if logs %}
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-info-circle me-2"></i>Activity Summary
+                </h6>
+                <p class="card-text">
+                    <strong>Total Activities:</strong> {{ logs|length }}<br>
+                    <strong>Last Activity:</strong> {{ logs[0].log.timestamp.strftime('%Y-%m-%d %H:%M:%S') if logs else 'N/A' }}
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-shield-alt me-2"></i>Security Information
+                </h6>
+                <p class="card-text">
+                    All user activities are logged with IP addresses and timestamps for security monitoring and audit purposes.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

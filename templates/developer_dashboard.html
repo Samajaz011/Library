@@ -1,0 +1,160 @@
+
+{% extends "base.html" %}
+
+{% block title %}Developer Dashboard - {{ system_settings.library_name }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h2 text-dark">
+                <i class="fas fa-cogs me-3"></i>Developer Dashboard
+            </h1>
+            <p class="text-muted">System Configuration & Branding Settings</p>
+        </div>
+        <a href="{{ url_for('developer_logout') }}" class="btn btn-outline-danger">
+            <i class="fas fa-sign-out-alt me-2"></i>Logout
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-palette me-2"></i>System Branding & Settings
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('update_system_settings') }}">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="school_name" class="form-label">School Name</label>
+                            <input type="text" class="form-control" id="school_name" name="school_name" 
+                                   value="{{ settings.school_name }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="library_name" class="form-label">Library Name</label>
+                            <input type="text" class="form-control" id="library_name" name="library_name" 
+                                   value="{{ settings.library_name }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="primary_color" class="form-label">Primary Color</label>
+                            <input type="color" class="form-control form-control-color" id="primary_color" 
+                                   name="primary_color" value="{{ settings.primary_color }}">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="secondary_color" class="form-label">Secondary Color</label>
+                            <input type="color" class="form-control form-control-color" id="secondary_color" 
+                                   name="secondary_color" value="{{ settings.secondary_color }}">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="accent_color" class="form-label">Accent Color</label>
+                            <input type="color" class="form-control form-control-color" id="accent_color" 
+                                   name="accent_color" value="{{ settings.accent_color }}">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="logo_url" class="form-label">Logo URL</label>
+                        <input type="url" class="form-control" id="logo_url" name="logo_url" 
+                               value="{{ settings.logo_url }}" placeholder="https://example.com/logo.png">
+                        <div class="form-text">Enter a URL to display a logo instead of the book icon</div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="developer_name" class="form-label">Developer Name</label>
+                            <input type="text" class="form-control" id="developer_name" name="developer_name" 
+                                   value="{{ settings.developer_name }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="footer_text" class="form-label">Footer Text</label>
+                            <input type="text" class="form-control" id="footer_text" name="footer_text" 
+                                   value="{{ settings.footer_text }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="address" class="form-label">School Address</label>
+                        <textarea class="form-control" id="address" name="address" rows="2">{{ settings.address }}</textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" 
+                                   value="{{ settings.phone }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   value="{{ settings.email }}">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-dark btn-lg">
+                        <i class="fas fa-save me-2"></i>Save Settings
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-eye me-2"></i>Live Preview
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="border rounded p-3 mb-3" style="background: linear-gradient(135deg, {{ settings.primary_color }}, {{ settings.secondary_color }});">
+                    <div class="text-white text-center">
+                        {% if settings.logo_url %}
+                            <img src="{{ settings.logo_url }}" alt="Logo" height="30" class="mb-2">
+                        {% else %}
+                            <i class="fas fa-book-open fa-2x mb-2"></i>
+                        {% endif %}
+                        <h6>{{ settings.library_name }}</h6>
+                    </div>
+                </div>
+                
+                <div class="small">
+                    <strong>Color Scheme:</strong><br>
+                    <span class="badge me-1" style="background-color: {{ settings.primary_color }};">Primary</span>
+                    <span class="badge me-1" style="background-color: {{ settings.secondary_color }};">Secondary</span>
+                    <span class="badge" style="background-color: {{ settings.accent_color }};">Accent</span>
+                </div>
+                
+                <hr>
+                
+                <div class="small">
+                    <strong>Footer Preview:</strong><br>
+                    <em>{{ settings.footer_text }}</em>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card shadow-sm mt-3">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Developer Notes
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="small mb-0">
+                    <li>Changes apply immediately</li>
+                    <li>Logo should be 30px height recommended</li>
+                    <li>Colors use hex format (#RRGGBB)</li>
+                    <li>Settings are stored in memory (restart resets)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

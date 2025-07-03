@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - Little Flower Library{% endblock %}
+
+{% block content %}
+<div class="hero-section text-center py-5 mb-5">
+    <div class="container">
+        <div class="fade-in-up">
+            <h1 class="display-4 fw-bold mb-4" style="text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                <i class="fas fa-book-open me-3"></i>
+                Little Flower International School
+            </h1>
+            <h2 class="display-6 mb-4 opacity-90">Library Management System</h2>
+            <p class="lead mb-5 opacity-75">Access your library resources with role-based secure login</p>
+        </div>
+
+        <div class="row justify-content-center g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="login-card card card-enhanced shadow-lg border-0 h-100 scale-in" style="animation-delay: 0.2s;">
+                    <div class="card-body text-center p-5">
+                        <div class="login-icon mb-4">
+                            <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px; font-size: 2.5rem;">
+                                <i class="fas fa-user-shield"></i>
+                            </div>
+                        </div>
+                        <h3 class="card-title text-primary fw-bold">Administrator</h3>
+                        <p class="card-text text-muted mb-4">Manage library operations, users, and monitor activities</p>
+                        <a href="{{ url_for('admin_login') }}" class="btn btn-enhanced btn-primary btn-lg w-100">
+                            <i class="fas fa-sign-in-alt me-2"></i>Admin Login
+                        </a>
+                        <small class="text-muted d-block mt-3">
+                            <i class="fas fa-users me-1"></i>Complete system control
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="login-card card card-enhanced shadow-lg border-0 h-100 scale-in" style="animation-delay: 0.4s;">
+                    <div class="card-body text-center p-5">
+                        <div class="login-icon mb-4">
+                            <div class="bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px; font-size: 2.5rem;">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                            </div>
+                        </div>
+                        <h3 class="card-title text-secondary fw-bold">Teacher</h3>
+                        <p class="card-text text-muted mb-4">Browse and borrow books for educational purposes</p>
+                        <a href="{{ url_for('teacher_login') }}" class="btn btn-enhanced btn-secondary btn-lg w-100">
+                            <i class="fas fa-sign-in-alt me-2"></i>Teacher Login
+                        </a>
+                        <small class="text-muted d-block mt-3">
+                            <i class="fas fa-book me-1"></i>Educational resources
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="login-card card card-enhanced shadow-lg border-0 h-100 scale-in" style="animation-delay: 0.6s;">
+                    <div class="card-body text-center p-5">
+                        <div class="login-icon mb-4">
+                            <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px; font-size: 2.5rem;">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                        </div>
+                        <h3 class="card-title text-warning fw-bold">Student</h3>
+                        <p class="card-text text-muted mb-4">Discover and borrow books for your studies</p>
+                        <a href="{{ url_for('student_login') }}" class="btn btn-enhanced btn-accent btn-lg w-100">
+                            <i class="fas fa-sign-in-alt me-2"></i>Student Login
+                        </a>
+                        <small class="text-muted d-block mt-3">
+                            <i class="fas fa-graduation-cap me-1"></i>Academic materials
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="features-section py-5">
+    <div class="container">
+        <h3 class="text-center mb-5 text-primary">System Features</h3>
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="feature-card text-center">
+                    <i class="fas fa-books fa-2x text-primary mb-3"></i>
+                    <h5>Book Management</h5>
+                    <p class="text-muted">Complete catalog management with search and filtering</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="feature-card text-center">
+                    <i class="fas fa-exchange-alt fa-2x text-secondary mb-3"></i>
+                    <h5>Borrow & Return</h5>
+                    <p class="text-muted">Automated tracking with due date management</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="feature-card text-center">
+                    <i class="fas fa-users fa-2x text-accent mb-3"></i>
+                    <h5>User Management</h5>
+                    <p class="text-muted">Role-based access for students, teachers, and admin</p>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="feature-card text-center">
+                    <i class="fas fa-chart-line fa-2x text-success mb-3"></i>
+                    <h5>Activity Monitoring</h5>
+                    <p class="text-muted">Real-time tracking with IP and timestamp logging</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

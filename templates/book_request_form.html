@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}Request Book - Little Flower Library{% endblock %}
+
+{% block content %}
+<div class="page-header mb-4">
+    <h1 class="page-title">
+        <i class="fas fa-paper-plane me-3"></i>Request Book
+    </h1>
+    <p class="text-muted">Submit a request to borrow a book from the library</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card card-enhanced shadow-lg">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-book me-2"></i>Book Request Form
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                {% if book %}
+                <div class="bg-light rounded p-4 mb-4">
+                    <div class="row">
+                        <div class="col-md-3 text-center">
+                            <div class="bg-primary text-white rounded d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                                <i class="fas fa-book"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <h4 class="text-primary mb-2">{{ book.title }}</h4>
+                            <p class="text-muted mb-1"><strong>Author:</strong> {{ book.author }}</p>
+                            <p class="text-muted mb-1"><strong>Genre:</strong> {{ book.genre }}</p>
+                            <p class="text-muted mb-1"><strong>Year:</strong> {{ book.publication_year }}</p>
+                            <p class="text-muted mb-1"><strong>ISBN:</strong> {{ book.isbn }}</p>
+                            <span class="badge bg-{{ 'success' if book.available_copies > 0 else 'danger' }} rounded-pill">
+                                {{ book.available_copies }} of {{ book.total_copies }} available
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <form method="POST" action="{{ url_for('request_book_with_message', book_id=book.id) }}">
+                    <div class="mb-4">
+                        <label for="message" class="form-label fw-bold">
+                            <i class="fas fa-comment me-2 text-primary"></i>Request Message (Optional)
+                        </label>
+                        <textarea class="form-control form-control-lg" id="message" name="message" rows="4" 
+                                  placeholder="Explain why you need this book or add any special requests..."></textarea>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Providing a reason helps the admin prioritize your request.
+                        </div>
+                    </div>
+                    
+                    <div class="bg-light rounded p-3 mb-4">
+                        <h6 class="text-primary mb-2">
+                            <i class="fas fa-info-circle me-2"></i>Request Information
+                        </h6>
+                        <ul class="list-unstyled mb-0 text-muted">
+                            <li><i class="fas fa-user me-2"></i><strong>Requester:</strong> {{ current_user.full_name }} ({{ current_user.role.title() }})</li>
+                            <li><i class="fas fa-calendar me-2"></i><strong>Borrowing Period:</strong> 15 days from approval date</li>
+                            <li><i class="fas fa-coins me-2"></i><strong>Late Fee:</strong> 1 rs per day after due date</li>
+                            <li><i class="fas fa-clock me-2"></i><strong>Processing:</strong> Admin will review within 24-48 hours</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('book_search') }}" class="btn btn-outline-secondary btn-lg me-md-2">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Search
+                        </a>
+                        <button type="submit" class="btn btn-enhanced btn-primary btn-lg">
+                            <i class="fas fa-paper-plane me-2"></i>Submit Request
+                        </button>
+                    </div>
+                </form>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                    <h5 class="text-warning">Book Not Found</h5>
+                    <p class="text-muted">The requested book could not be found.</p>
+                    <a href="{{ url_for('book_search') }}" class="btn btn-primary">
+                        <i class="fas fa-search me-2"></i>Search Books
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card card-glass shadow-lg">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-question-circle me-2 text-primary"></i>How It Works
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-primary text-white">1</div>
+                        <div class="timeline-content">
+                            <h6 class="fw-bold">Submit Request</h6>
+                            <p class="text-muted small">Fill out the form and submit your book request with an optional message.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-warning text-white">2</div>
+                        <div class="timeline-content">
+                            <h6 class="fw-bold">Admin Review</h6>
+                            <p class="text-muted small">The library admin will review your request and check book availability.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-success text-white">3</div>
+                        <div class="timeline-content">
+                            <h6 class="fw-bold">Approval & Assignment</h6>
+                            <p class="text-muted small">If approved, the book is assigned to you with a 15-day borrowing period.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-info text-white">4</div>
+                        <div class="timeline-content">
+                            <h6 class="fw-bold">Return Process</h6>
+                            <p class="text-muted small">Return the book within 15 days to avoid late fees (1 rs per day).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% if current_user.role in ['student', 'teacher'] %}
+        <div class="card card-glass shadow-lg mt-4">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-history me-2 text-secondary"></i>Your Recent Requests
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- This would show user's recent requests in a real implementation -->
+                <p class="text-muted small">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Your recent book requests will appear here once submitted.
+                </p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: -19px;
+    top: 30px;
+    height: calc(100% + 10px);
+    width: 2px;
+    background-color: #dee2e6;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -30px;
+    top: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.timeline-content {
+    margin-left: 10px;
+}
+</style>
+{% endblock %}

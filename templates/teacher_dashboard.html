@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Teacher Dashboard - Little Flower Library{% endblock %}
+
+{% block content %}
+<div class="dashboard-header mb-4">
+    <h1 class="h2 text-secondary">
+        <i class="fas fa-chalkboard-teacher me-3"></i>Teacher Dashboard
+    </h1>
+    <p class="text-muted">Welcome, {{ current_user.full_name }}! Manage your library resources.</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-search me-2"></i>Discover Books
+                </h5>
+            </div>
+            <div class="card-body text-center p-5">
+                <i class="fas fa-book-reader fa-4x text-secondary mb-4"></i>
+                <h4 class="mb-3">Find Your Next Read</h4>
+                <p class="text-muted mb-4">Search through our extensive collection of educational and reference materials.</p>
+                <a href="{{ url_for('book_search') }}" class="btn btn-secondary btn-lg">
+                    <i class="fas fa-search me-2"></i>Browse Books
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-user-circle me-2"></i>Your Profile
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-user me-2 text-muted"></i>
+                        <strong>Name:</strong> {{ current_user.full_name }}
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-envelope me-2 text-muted"></i>
+                        <strong>Email:</strong> {{ current_user.email }}
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-id-badge me-2 text-muted"></i>
+                        <strong>Role:</strong> Teacher
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-calendar me-2 text-muted"></i>
+                        <strong>Member Since:</strong> {{ current_user.created_at.strftime('%B %Y') }}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

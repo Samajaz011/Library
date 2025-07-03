@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block title %}Import Books - Little Flower Library{% endblock %}
+
+{% block content %}
+<div class="page-header mb-4">
+    <h1 class="page-title">
+        <i class="fas fa-file-excel me-3"></i>Import Books from Excel
+    </h1>
+    <p class="text-muted">Upload an Excel file to add multiple books to the library collection</p>
+</div>
+
+<!-- Import Status Messages -->
+{% if session.import_errors %}
+<div class="alert alert-warning alert-dismissible fade show shadow-lg mb-4" role="alert">
+    <div class="d-flex align-items-center mb-2">
+        <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+        <div>
+            <h5 class="alert-heading mb-1">Import Errors Detected</h5>
+            <p class="mb-0">The following errors occurred during import:</p>
+        </div>
+    </div>
+    <hr>
+    <ul class="mb-0">
+        {% for error in session.import_errors %}
+        <li class="small">{{ error }}</li>
+        {% endfor %}
+    </ul>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% set _ = session.pop('import_errors', None) %}
+{% endif %}
+
+<div class="row">
+    <!-- Upload Form -->
+    <div class="col-lg-8">
+        <div class="card card-enhanced shadow-lg mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-upload me-2"></i>Upload Excel File
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" enctype="multipart/form-data" id="importForm">
+                    <div class="mb-4">
+                        <label for="excel_file" class="form-label fw-bold">
+                            <i class="fas fa-file-excel me-2 text-success"></i>Select Excel File
+                        </label>
+                        <input type="file" class="form-control form-control-lg" id="excel_file" name="excel_file" 
+                               accept=".xlsx,.xls" required>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Supported formats: .xlsx, .xls (Maximum file size: 10MB)
+                        </div>
+                    </div>
+                    
+                    <div class="bg-light rounded p-4 mb-4">
+                        <h6 class="text-primary mb-3">
+                            <i class="fas fa-check-circle me-2"></i>Before Uploading
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled text-muted">
+                                    <li><i class="fas fa-download me-2 text-success"></i>Download the template file</li>
+                                    <li><i class="fas fa-edit me-2 text-info"></i>Fill in your book data</li>
+                                    <li><i class="fas fa-save me-2 text-warning"></i>Save as Excel format</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled text-muted">
+                                    <li><i class="fas fa-check me-2 text-primary"></i>Verify all required fields</li>
+                                    <li><i class="fas fa-search me-2 text-secondary"></i>Check for duplicate ISBNs</li>
+                                    <li><i class="fas fa-upload me-2 text-danger"></i>Upload your file</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                        <a href="{{ url_for('download_template') }}" class="btn btn-enhanced btn-success btn-lg">
+                            <i class="fas fa-download me-2"></i>Download Template
+                        </a>
+                        <div>
+                            <a href="{{ url_for('book_management') }}" class="btn btn-outline-secondary btn-lg me-2">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Books
+                            </a>
+                            <button type="submit" class="btn btn-enhanced btn-primary btn-lg" id="uploadBtn">
+                                <i class="fas fa-upload me-2"></i>Import Books
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Instructions and Requirements -->
+    <div class="col-lg-4">
+        <div class="card card-glass shadow-lg mb-4">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-clipboard-list me-2 text-primary"></i>Required Columns
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Column</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Title</strong></td>
+                                <td>Text</td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Author</strong></td>
+                                <td>Text</td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td><strong>ISBN</strong></td>
+                                <td>Text</td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Genre</strong></td>
+                                <td>Text</td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Publication_Year</strong></td>
+                                <td>Number</td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total_Copies</strong></td>
+                                <td>Number</td>
+                                <td><i class="fas fa-check text-success"></i></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card card-glass shadow-lg mb-4">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-exclamation-triangle me-2 text-warning"></i>Important Notes
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-barcode me-2 text-primary"></i>
+                        <strong>ISBN must be unique</strong> - duplicate ISBNs will be rejected
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-calendar me-2 text-info"></i>
+                        <strong>Publication Year</strong> must be between 1000 and 2030
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-copy me-2 text-success"></i>
+                        <strong>Total Copies</strong> must be at least 1
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-file-excel me-2 text-warning"></i>
+                        Use the <strong>exact column names</strong> from the template
+                    </li>
+                    <li class="mb-0">
+                        <i class="fas fa-trash me-2 text-danger"></i>
+                        Remove sample data rows before importing
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card card-glass shadow-lg">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-lightbulb me-2 text-warning"></i>Tips for Success
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="accordion accordion-flush" id="tipsAccordion">
+                    <div class="accordion-item border-0">
+                        <h6 class="accordion-header">
+                            <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse" data-bs-target="#tip1">
+                                <i class="fas fa-search me-2"></i>ISBN Format
+                            </button>
+                        </h6>
+                        <div id="tip1" class="accordion-collapse collapse" data-bs-parent="#tipsAccordion">
+                            <div class="accordion-body py-2">
+                                <small class="text-muted">
+                                    Use standard ISBN-13 format (978-XXXXXXXXX) or ISBN-10 format. 
+                                    Hyphens are optional but recommended for readability.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item border-0">
+                        <h6 class="accordion-header">
+                            <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse" data-bs-target="#tip2">
+                                <i class="fas fa-edit me-2"></i>Data Preparation
+                            </button>
+                        </h6>
+                        <div id="tip2" class="accordion-collapse collapse" data-bs-parent="#tipsAccordion">
+                            <div class="accordion-body py-2">
+                                <small class="text-muted">
+                                    Clean your data before importing. Remove extra spaces, 
+                                    ensure proper capitalization, and validate all numeric fields.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item border-0">
+                        <h6 class="accordion-header">
+                            <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse" data-bs-target="#tip3">
+                                <i class="fas fa-shield-alt me-2"></i>Error Handling
+                            </button>
+                        </h6>
+                        <div id="tip3" class="accordion-collapse collapse" data-bs-parent="#tipsAccordion">
+                            <div class="accordion-body py-2">
+                                <small class="text-muted">
+                                    If errors occur, fix the issues in your Excel file and re-upload. 
+                                    Successfully imported books will not be duplicated.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('importForm').addEventListener('submit', function(e) {
+    const uploadBtn = document.getElementById('uploadBtn');
+    const fileInput = document.getElementById('excel_file');
+    
+    if (!fileInput.files.length) {
+        e.preventDefault();
+        alert('Please select an Excel file to upload.');
+        return;
+    }
+    
+    // Show loading state
+    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+    uploadBtn.disabled = true;
+    
+    // Show processing message
+    const processingDiv = document.createElement('div');
+    processingDiv.className = 'alert alert-info mt-3';
+    processingDiv.innerHTML = '<i class="fas fa-cog fa-spin me-2"></i>Processing your Excel file... This may take a moment.';
+    uploadBtn.parentNode.appendChild(processingDiv);
+});
+
+// File size validation
+document.getElementById('excel_file').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const maxSize = 10 * 1024 * 1024; // 10MB
+        if (file.size > maxSize) {
+            alert('File size exceeds 10MB limit. Please choose a smaller file.');
+            e.target.value = '';
+        }
+    }
+});
+</script>
+{% endblock %}

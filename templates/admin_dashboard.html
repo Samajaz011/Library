@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Little Flower Library{% endblock %}
+
+{% block content %}
+<div class="dashboard-header mb-4">
+    <h1 class="h2 text-primary">
+        <i class="fas fa-tachometer-alt me-3"></i>Administrator Dashboard
+    </h1>
+    <p class="text-muted">Comprehensive library management and monitoring</p>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="stats-card card card-gradient-primary text-white h-100 fade-in-up">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">Total Books</h5>
+                        <h2 class="mb-0 fw-bold">{{ total_books }}</h2>
+                        <small class="opacity-75">In Collection</small>
+                    </div>
+                    <i class="fas fa-books fa-3x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stats-card card card-gradient-secondary text-white h-100 fade-in-up" style="animation-delay: 0.1s;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">Total Users</h5>
+                        <h2 class="mb-0 fw-bold">{{ total_users }}</h2>
+                        <small class="opacity-75">Registered</small>
+                    </div>
+                    <i class="fas fa-users fa-3x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stats-card card bg-info text-white h-100 fade-in-up" style="animation-delay: 0.2s;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">Active Loans</h5>
+                        <h2 class="mb-0 fw-bold">{{ active_transactions }}</h2>
+                        <small class="opacity-75">Currently Out</small>
+                    </div>
+                    <i class="fas fa-exchange-alt fa-3x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="stats-card card card-gradient-accent text-white h-100 fade-in-up" style="animation-delay: 0.3s;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="card-title">Overdue Books</h5>
+                        <h2 class="mb-0 fw-bold">{{ overdue_books }}</h2>
+                        <small class="opacity-75">Need Attention</small>
+                    </div>
+                    <i class="fas fa-exclamation-triangle fa-3x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card card-enhanced shadow-lg slide-up">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-cogs me-2 text-primary"></i>Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <a href="{{ url_for('book_management') }}" class="btn btn-enhanced btn-outline-primary btn-lg w-100 h-100 d-flex align-items-center justify-content-center text-decoration-none">
+                            <div class="text-center p-3">
+                                <i class="fas fa-books fa-3x mb-3 text-primary"></i>
+                                <div class="fw-bold">Manage Books</div>
+                                <small class="text-muted d-block mt-1">Add, edit, delete books</small>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="{{ url_for('import_books') }}" class="btn btn-enhanced btn-outline-success btn-lg w-100 h-100 d-flex align-items-center justify-content-center text-decoration-none">
+                            <div class="text-center p-3">
+                                <i class="fas fa-file-excel fa-3x mb-3 text-success"></i>
+                                <div class="fw-bold">Import Books</div>
+                                <small class="text-muted d-block mt-1">Upload Excel file</small>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="{{ url_for('user_management') }}" class="btn btn-enhanced btn-outline-secondary btn-lg w-100 h-100 d-flex align-items-center justify-content-center text-decoration-none">
+                            <div class="text-center p-3">
+                                <i class="fas fa-users fa-3x mb-3 text-secondary"></i>
+                                <div class="fw-bold">Manage Users</div>
+                                <small class="text-muted d-block mt-1">Teachers & students</small>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="{{ url_for('borrow_return') }}" class="btn btn-enhanced btn-outline-info btn-lg w-100 h-100 d-flex align-items-center justify-content-center text-decoration-none">
+                            <div class="text-center p-3">
+                                <i class="fas fa-exchange-alt fa-3x mb-3 text-info"></i>
+                                <div class="fw-bold">View Transactions</div>
+                                <small class="text-muted d-block mt-1">Borrowing history</small>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="{{ url_for('manage_book_requests') }}" class="btn btn-enhanced btn-outline-warning btn-lg w-100 h-100 d-flex align-items-center justify-content-center text-decoration-none">
+                            <div class="text-center p-3">
+                                <i class="fas fa-clipboard-list fa-3x mb-3 text-warning"></i>
+                                <div class="fw-bold">Book Requests</div>
+                                <small class="text-muted d-block mt-1">Review pending requests</small>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="{{ url_for('assign_book') }}" class="btn btn-enhanced btn-outline-info btn-lg w-100 h-100 d-flex align-items-center justify-content-center text-decoration-none">
+                            <div class="text-center p-3">
+                                <i class="fas fa-hand-holding-heart fa-3x mb-3 text-info"></i>
+                                <div class="fw-bold">Direct Assignment</div>
+                                <small class="text-muted d-block mt-1">Assign books directly</small>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="{{ url_for('admin_reports') }}" class="btn btn-enhanced btn-outline-danger btn-lg w-100 h-100 d-flex align-items-center justify-content-center text-decoration-none">
+                            <div class="text-center p-3">
+                                <i class="fas fa-chart-bar fa-3x mb-3 text-danger"></i>
+                                <div class="fw-bold">Reports</div>
+                                <small class="text-muted d-block mt-1">Analytics & overdue tracking</small>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="{{ url_for('activity_monitoring') }}" class="btn btn-enhanced btn-outline-success btn-lg w-100 h-100 d-flex align-items-center justify-content-center text-decoration-none">
+                            <div class="text-center p-3">
+                                <i class="fas fa-chart-line fa-3x mb-3 text-success"></i>
+                                <div class="fw-bold">Activity Monitor</div>
+                                <small class="text-muted d-block mt-1">User activity logs</small>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-glass shadow-lg scale-in">
+            <div class="card-header bg-light border-0">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2 text-primary"></i>System Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <div class="skeleton-avatar bg-primary text-white d-inline-flex align-items-center justify-content-center fs-2 fw-bold mx-auto">
+                        {{ current_user.full_name[0] }}
+                    </div>
+                </div>
+                <ul class="list-unstyled">
+                    <li class="mb-3 p-2 rounded bg-light">
+                        <i class="fas fa-calendar me-2 text-primary"></i>
+                        <strong>Today:</strong> <span class="live-date text-muted"></span>
+                    </li>
+                    <li class="mb-3 p-2 rounded bg-light">
+                        <i class="fas fa-user me-2 text-success"></i>
+                        <strong>User:</strong> {{ current_user.full_name }}
+                    </li>
+                    <li class="mb-3 p-2 rounded bg-light">
+                        <i class="fas fa-shield-alt me-2 text-warning"></i>
+                        <strong>Role:</strong> <span class="badge bg-primary">Administrator</span>
+                    </li>
+                    <li class="mb-0 p-2 rounded bg-light">
+                        <i class="fas fa-clock me-2 text-info"></i>
+                        <strong>Time:</strong> <span class="live-clock text-muted"></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

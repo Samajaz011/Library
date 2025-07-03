@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Transaction Management - Little Flower Library{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h2 text-primary">
+        <i class="fas fa-exchange-alt me-3"></i>Transaction Management
+    </h1>
+    <p class="text-muted">Monitor all book borrowing and returning activities</p>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-light">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-list me-2"></i>All Transactions
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if transactions %}
+        <div class="table-responsive">
+            <table class="table table-modern table-hover">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-calendar me-1"></i>Borrow Date</th>
+                        <th><i class="fas fa-user me-1"></i>User</th>
+                        <th><i class="fas fa-book me-1"></i>Book</th>
+                        <th><i class="fas fa-clock me-1"></i>Due Date</th>
+                        <th><i class="fas fa-undo me-1"></i>Return Date</th>
+                        <th><i class="fas fa-coins me-1"></i>Fine</th>
+                        <th><i class="fas fa-flag me-1"></i>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in transactions %}
+                    <tr class="fade-in-up {{ 'table-danger' if item.transaction.is_overdue else 'table-success' if item.transaction.is_returned else '' }}" style="animation-delay: {{ loop.index0 * 0.03 }}s;">
+                        <td>
+                            <strong>{{ item.transaction.transaction_date.strftime('%Y-%m-%d') }}</strong>
+                            <br><small class="text-muted">{{ item.transaction.transaction_date.strftime('%H:%M') }}</small>
+                        </td>
+                        <td>
+                            {% if item.user %}
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-{{ 'primary' if item.user.role == 'admin' else 'secondary' if item.user.role == 'teacher' else 'warning' }} text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; font-size: 14px;">
+                                        {{ item.user.full_name[0] }}
+                                    </div>
+                                    <div>
+                                        <strong>{{ item.user.full_name }}</strong>
+                                        <br><small class="text-muted">{{ item.user.username }} ({{ item.user.role.title() }})</small>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <span class="text-muted fst-italic">Unknown User</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.book %}
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary text-white rounded d-flex align-items-center justify-content-center me-3" style="width: 32px; height: 32px; font-size: 14px;">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <div>
+                                    <strong class="text-primary">{{ item.book.title }}</strong>
+                                    <br><small class="text-muted">by {{ item.book.author }}</small>
+                                </div>
+                            </div>
+                            {% else %}
+                                <span class="text-muted fst-italic">Unknown Book</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="fw-bold {{ 'text-danger' if item.transaction.is_overdue else 'text-success' if item.transaction.is_returned else 'text-primary' }}">
+                                {{ item.transaction.due_date.strftime('%Y-%m-%d') }}
+                            </span>
+                            {% if item.transaction.is_overdue and not item.transaction.is_returned %}
+                                <br><small class="text-danger">{{ item.transaction.days_overdue }} days overdue</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.transaction.return_date %}
+                                <span class="fw-bold text-success">{{ item.transaction.return_date.strftime('%Y-%m-%d') }}</span>
+                                <br><small class="text-muted">{{ item.transaction.return_date.strftime('%H:%M') }}</small>
+                            {% else %}
+                                <span class="text-muted fst-italic">Not returned</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.transaction.fine_amount > 0 %}
+                                <div class="d-flex flex-column">
+                                    <span class="fw-bold text-danger">{{ "%.2f"|format(item.transaction.fine_amount) }} rs</span>
+                                    {% if not item.transaction.fine_paid %}
+                                        <small class="badge bg-danger">Unpaid</small>
+                                    {% else %}
+                                    <small class="badge bg-success">Paid</small>
+                                        {% if item.transaction.payment_date %}
+                                        <small class="text-muted">{{ item.transaction.payment_date.strftime('%Y-%m-%d') }}</small>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                <span class="text-muted">No fine</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.transaction.is_returned %}
+                                <span class="badge bg-success rounded-pill px-3">
+                                    <i class="fas fa-check me-1"></i>Returned
+                                </span>
+                            {% elif item.transaction.is_overdue %}
+                                <div class="d-flex flex-column gap-1">
+                                    <span class="badge bg-danger rounded-pill px-3">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>Overdue
+                                    </span>
+                                    {% if not item.transaction.fine_paid and item.transaction.fine_amount > 0 %}
+                                    <a href="{{ url_for('collect_fine', transaction_id=item.transaction.id) }}" 
+                                       class="btn btn-warning btn-sm">
+                                        <i class="fas fa-coins me-1"></i>Collect Fine
+                                    </a>
+                                    {% elif item.transaction.fine_paid %}
+                                    <span class="badge bg-success">Fine Paid</span>
+                                    {% endif %}
+                                </div>
+                                <br>
+                                <a href="{{ url_for('admin_return_book', transaction_id=item.transaction.id) }}" 
+                                   class="btn btn-sm btn-outline-primary mt-1"
+                                   onclick="return confirm('Mark this book as returned?')">
+                                    <i class="fas fa-undo me-1"></i>Return Book
+                                </a>
+                            {% else %}
+                                <span class="badge bg-warning rounded-pill px-3">
+                                    <i class="fas fa-clock me-1"></i>Active
+                                </span>
+                                <br>
+                                <a href="{{ url_for('admin_return_book', transaction_id=item.transaction.id) }}" 
+                                   class="btn btn-sm btn-outline-primary mt-1"
+                                   onclick="return confirm('Mark this book as returned?')">
+                                    <i class="fas fa-undo me-1"></i>Return Book
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-exchange-alt fa-4x text-muted mb-4"></i>
+            <h4 class="text-muted">No Transactions Found</h4>
+            <p class="text-muted">Book transactions will appear here as users borrow and return books.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if transactions %}
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h4>{{ transactions|selectattr('transaction.transaction_type', 'equalto', 'borrow')|list|length }}</h4>
+                <p class="mb-0">Total Borrows</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h4>{{ transactions|selectattr('transaction.is_returned', 'equalto', true)|list|length }}</h4>
+                <p class="mb-0">Total Returns</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <h4>{{ transactions|rejectattr('transaction.is_returned', 'equalto', true)|list|length }}</h4>
+                <p class="mb-0">Active Loans</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body text-center">
+                <h4>{{ transactions|selectattr('is_overdue', 'equalto', true)|list|length }}</h4>
+                <p class="mb-0">Overdue Books</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

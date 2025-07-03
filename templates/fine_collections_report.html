@@ -1,0 +1,94 @@
+
+{% extends "base.html" %}
+
+{% block title %}Fine Collections Report - Little Flower Library{% endblock %}
+
+{% block content %}
+<div class="page-header mb-4">
+    <h1 class="page-title">
+        <i class="fas fa-file-pdf me-3"></i>Fine Collections Report
+    </h1>
+    <p class="text-muted">Generate and download PDF reports for fine collections by date range</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card card-enhanced shadow-lg">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-calendar-alt me-2"></i>Select Date Range
+                </h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('export_fine_collections_pdf') }}" method="GET" target="_blank">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="end_date" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" required>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Note:</strong> The report will include all fine collections made between the selected dates (inclusive).
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('admin_reports') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Reports
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-download me-2"></i>Generate PDF Report
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="card card-glass shadow-lg mt-4">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-bolt me-2 text-warning"></i>Quick Reports
+                </h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <a href="{{ url_for('export_fine_collections_pdf') }}?start_date={{ (datetime.now() - timedelta(days=6)).strftime('%Y-%m-%d') }}&end_date={{ datetime.now().strftime('%Y-%m-%d') }}" 
+                           class="btn btn-outline-primary w-100" target="_blank">
+                            <i class="fas fa-calendar-week me-2"></i>Last 7 Days
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{{ url_for('export_fine_collections_pdf') }}?start_date={{ datetime.now().replace(day=1).strftime('%Y-%m-%d') }}&end_date={{ datetime.now().strftime('%Y-%m-%d') }}" 
+                           class="btn btn-outline-success w-100" target="_blank">
+                            <i class="fas fa-calendar-alt me-2"></i>This Month
+                        </a>
+                    </div>
+                    <div class="col-md-4">
+                        <a href="{{ url_for('export_fine_collections_pdf') }}?start_date={{ (datetime.now() - timedelta(days=29)).strftime('%Y-%m-%d') }}&end_date={{ datetime.now().strftime('%Y-%m-%d') }}" 
+                           class="btn btn-outline-info w-100" target="_blank">
+                            <i class="fas fa-calendar-day me-2"></i>Last 30 Days
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Set default dates
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    
+    document.getElementById('start_date').value = firstDayOfMonth.toISOString().split('T')[0];
+    document.getElementById('end_date').value = today.toISOString().split('T')[0];
+});
+</script>
+{% endblock %}
+

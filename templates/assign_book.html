@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Assign Book - Little Flower Library{% endblock %}
+
+{% block content %}
+<div class="page-header mb-4">
+    <h1 class="page-title">
+        <i class="fas fa-hand-holding-heart me-3"></i>Assign Books to Users
+    </h1>
+    <p class="text-muted">Assign books to students and teachers with automatic 15-day due dates</p>
+</div>
+
+<!-- Assignment Form -->
+<div class="card card-enhanced shadow-lg mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-plus me-2"></i>Assign Book
+        </h5>
+    </div>
+    <div class="card-body p-4">
+        <form method="POST" class="row g-4">
+            <div class="col-md-6">
+                <label for="user_id" class="form-label fw-bold">
+                    <i class="fas fa-user me-2 text-primary"></i>Select User
+                </label>
+                <select class="form-select form-select-lg" id="user_id" name="user_id" required>
+                    <option value="">Choose a student or teacher...</option>
+                    {% for user in users %}
+                        <option value="{{ user.id }}">
+                            {{ user.full_name }} ({{ user.role.title() }}) - {{ user.username }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label for="book_id" class="form-label fw-bold">
+                    <i class="fas fa-book me-2 text-secondary"></i>Select Book
+                </label>
+                <select class="form-select form-select-lg" id="book_id" name="book_id" required>
+                    <option value="">Choose an available book...</option>
+                    {% for book in books %}
+                        <option value="{{ book.id }}">
+                            {{ book.title }} by {{ book.author }} ({{ book.available_copies }} available)
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-12">
+                <div class="bg-light rounded p-3 mb-3">
+                    <h6 class="text-primary mb-2">
+                        <i class="fas fa-info-circle me-2"></i>Assignment Details
+                    </h6>
+                    <ul class="list-unstyled mb-0 text-muted">
+                        <li><i class="fas fa-calendar me-2"></i><strong>Borrowing Period:</strong> 15 days from assignment date</li>
+                        <li><i class="fas fa-coins me-2"></i><strong>Late Fee:</strong> 1 rs per day after due date</li>
+                        <li><i class="fas fa-bell me-2"></i><strong>Notification:</strong> User will be notified of the assignment</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-enhanced btn-primary btn-lg">
+                    <i class="fas fa-hand-holding-heart me-2"></i>Assign Book
+                </button>
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary btn-lg ms-3">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Available Books Summary -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card card-glass shadow-lg">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-users me-2 text-primary"></i>Eligible Users
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-modern table-sm">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-user me-1"></i>Name</th>
+                                <th><i class="fas fa-tag me-1"></i>Role</th>
+                                <th><i class="fas fa-book me-1"></i>Active Loans</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr class="fade-in-up" style="animation-delay: {{ loop.index0 * 0.05 }}s;">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-{{ 'secondary' if user.role == 'teacher' else 'warning' }} text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 24px; height: 24px; font-size: 12px;">
+                                            {{ user.full_name[0] }}
+                                        </div>
+                                        {{ user.full_name }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{{ 'secondary' if user.role == 'teacher' else 'warning' }} rounded-pill">
+                                        {{ user.role.title() }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info rounded-pill">
+                                        0
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card card-glass shadow-lg">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-books me-2 text-secondary"></i>Available Books
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-modern table-sm">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-book me-1"></i>Title</th>
+                                <th><i class="fas fa-user me-1"></i>Author</th>
+                                <th><i class="fas fa-copy me-1"></i>Available</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for book in books %}
+                            <tr class="fade-in-up" style="animation-delay: {{ loop.index0 * 0.05 }}s;">
+                                <td>
+                                    <strong class="text-primary">{{ book.title }}</strong>
+                                </td>
+                                <td>{{ book.author }}</td>
+                                <td>
+                                    <span class="badge bg-success rounded-pill px-2">
+                                        {{ book.available_copies }}/{{ book.total_copies }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

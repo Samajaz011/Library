@@ -1,0 +1,101 @@
+
+{% extends "base.html" %}
+
+{% block title %}Import Users - Little Flower Library{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h2 text-primary">
+        <i class="fas fa-user-plus me-3"></i>Import Users
+    </h1>
+    <p class="text-muted">Upload Excel file to add multiple users (students and teachers) at once</p>
+</div>
+
+<!-- Import Instructions -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-info-circle me-2"></i>Import Instructions
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Required Columns:</h6>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success me-2"></i><strong>Full_Name</strong> - User's full name</li>
+                    <li><i class="fas fa-check text-success me-2"></i><strong>Email</strong> - Valid email address</li>
+                    <li><i class="fas fa-check text-success me-2"></i><strong>Role</strong> - 'student' or 'teacher'</li>
+                    <li><i class="fas fa-check text-success me-2"></i><strong>Password</strong> - Initial password</li>
+                    <li><i class="fas fa-check text-warning me-2"></i><strong>Admission_Number</strong> - Required for students (becomes username)</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6>Important Notes:</h6>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-exclamation-triangle text-warning me-2"></i>Student usernames will be their admission numbers</li>
+                    <li><i class="fas fa-exclamation-triangle text-warning me-2"></i>Teacher usernames will be auto-generated from email</li>
+                    <li><i class="fas fa-exclamation-triangle text-warning me-2"></i>All usernames must be unique</li>
+                    <li><i class="fas fa-exclamation-triangle text-warning me-2"></i>Use the template for best results</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Download Template -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-download me-2"></i>Download Template
+        </h5>
+    </div>
+    <div class="card-body">
+        <p>Download our pre-formatted Excel template to ensure your data is properly structured:</p>
+        <a href="{{ url_for('download_user_template') }}" class="btn btn-success btn-lg">
+            <i class="fas fa-file-excel me-2"></i>Download User Import Template
+        </a>
+    </div>
+</div>
+
+<!-- Upload Section -->
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-upload me-2"></i>Upload User Data
+        </h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('import_users_post') }}" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="excel_file" class="form-label">Excel File (.xlsx or .xls)</label>
+                <input type="file" class="form-control" id="excel_file" name="excel_file" accept=".xlsx,.xls" required>
+                <div class="form-text">Maximum file size: 10MB</div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-upload me-2"></i>Import Users
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Error Display -->
+{% if session.get('import_errors') %}
+<div class="card shadow-sm mt-4">
+    <div class="card-header bg-warning">
+        <h5 class="mb-0 text-white">
+            <i class="fas fa-exclamation-triangle me-2"></i>Import Errors
+        </h5>
+    </div>
+    <div class="card-body">
+        <p>The following errors occurred during import:</p>
+        <ul class="list-unstyled">
+            {% for error in session['import_errors'] %}
+            <li class="text-danger"><i class="fas fa-times me-2"></i>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% set _ = session.pop('import_errors', None) %}
+{% endif %}
+{% endblock %}
